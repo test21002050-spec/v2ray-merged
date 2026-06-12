@@ -23,7 +23,6 @@ jobs:
             "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt"
             "https://raw.githubusercontent.com/freefq/free/master/v2"
             "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray"
-            "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/mix"
             "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt"
           )
           
