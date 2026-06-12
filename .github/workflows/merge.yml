@@ -15,6 +15,7 @@ jobs:
       - name: Merge Subscriptions
         run: |
           > merged.txt
+          > merged_base64.txt
           
           URLS=(
             "https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha.txt"
@@ -37,12 +38,13 @@ jobs:
           done
           
           sed -i '/^$/d' merged.txt
+          base64 -w 0 merged.txt > merged_base64.txt
           echo "Total lines: $(wc -l < merged.txt)"
 
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add merged.txt
+          git add merged.txt merged_base64.txt
           git diff --staged --quiet || git commit -m "Update merged subscriptions - $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
