@@ -1,0 +1,49 @@
+name: Merge V2Ray Subscriptions
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Merge Subscriptions
+        run: |
+          > merged.txt
+          
+          URLS=(
+            "https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha.txt"
+            "https://raw.githubusercontent.com/hans-thomas/v2ray-subscription/refs/heads/master/servers.txt"
+            "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity.txt"
+            "https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt"
+            "https://raw.githubusercontent.com/freefq/free/master/v2"
+            "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray"
+            "https://raw.githubusercontent.com/MhdiTaheri/V2rayCollector/main/sub/mix"
+            "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt"
+          )
+          
+          for url in "${URLS[@]}"; do
+            echo "Fetching: $url"
+            content=$(curl -sL --max-time 30 "$url" || echo "")
+            if [ -n "$content" ]; then
+              decoded=$(echo "$content" | base64 -d 2>/dev/null || echo "$content")
+              echo "$decoded" >> merged.txt
+              echo "" >> merged.txt
+            fi
+          done
+          
+          sed -i '/^$/d' merged.txt
+          echo "Total lines: $(wc -l < merged.txt)"
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add merged.txt
+          git diff --staged --quiet || git commit -m "Update merged subscriptions - $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
