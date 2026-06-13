@@ -15,7 +15,7 @@ jobs:
       - name: Merge Subscriptions
         run: |
           > merged.txt
-          > merged_base64.txt
+          > merged_hiddify.txt
           
           URLS=(
             "https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha.txt"
@@ -25,6 +25,15 @@ jobs:
             "https://raw.githubusercontent.com/freefq/free/master/v2"
             "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray"
             "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt"
+          )
+          
+          HIDDIFY_URLS=(
+            "https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray"
+            "https://raw.githubusercontent.com/hans-thomas/v2ray-subscription/refs/heads/master/servers.txt"
+            "https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity.txt"
+            "https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub"
+            "https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt"
+            "https://raw.githubusercontent.com/resasanian/Mirza/main/sub"
           )
           
           for url in "${URLS[@]}"; do
@@ -37,14 +46,25 @@ jobs:
             fi
           done
           
+          for url in "${HIDDIFY_URLS[@]}"; do
+            echo "Fetching for Hiddify: $url"
+            content=$(curl -sL --max-time 30 "$url" || echo "")
+            if [ -n "$content" ]; then
+              decoded=$(echo "$content" | base64 -d 2>/dev/null || echo "$content")
+              echo "$decoded" >> merged_hiddify.txt
+              echo "" >> merged_hiddify.txt
+            fi
+          done
+          
           sed -i '/^$/d' merged.txt
-          base64 -w 0 merged.txt > merged_base64.txt
-          echo "Total lines: $(wc -l < merged.txt)"
+          sed -i '/^$/d' merged_hiddify.txt
+          echo "Nekobox lines: $(wc -l < merged.txt)"
+          echo "Hiddify lines: $(wc -l < merged_hiddify.txt)"
 
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add merged.txt merged_base64.txt
+          git add merged.txt merged_hiddify.txt
           git diff --staged --quiet || git commit -m "Update merged subscriptions - $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
