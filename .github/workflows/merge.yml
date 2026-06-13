@@ -58,6 +58,8 @@ jobs:
           
           sed -i '/^$/d' merged.txt
           sed -i '/^$/d' merged_hiddify.txt
+          iconv -f utf-8 -t utf-8 -c merged_hiddify.txt > merged_hiddify_clean.txt
+          mv merged_hiddify_clean.txt merged_hiddify.txt
           echo "Nekobox lines: $(wc -l < merged.txt)"
           echo "Hiddify lines: $(wc -l < merged_hiddify.txt)"
 
